@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "defaultMode": "bypassPermissions",
+    "allow": [
+      "mcp__Supabase",
+      "mcp__Vercel",
+      "mcp__github",
+      "Bash",
+      "WebFetch",
+      "WebSearch"
+    ]
+  }
+}

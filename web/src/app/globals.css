@@ -1,0 +1,29 @@
+@import "tailwindcss";
+
+/* Tenant theming: --brand / --brand-accent are overridden per tenant via an
+   inline style on <body> (values come from vitrina_tenants.brand, which the
+   AI pipeline derives from the partner's logo). */
+:root {
+  --brand: #0f4c81;
+  --brand-accent: #f4c430;
+  --ink: #101820;
+  --paper: #ffffff;
+  --muted: #5c6670;
+  --line: #e3e7ea;
+}
+
+@theme inline {
+  --color-brand: var(--brand);
+  --color-brand-accent: var(--brand-accent);
+  --color-ink: var(--ink);
+  --color-paper: var(--paper);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif);
+  -webkit-font-smoothing: antialiased;
+}
