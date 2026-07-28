@@ -22,6 +22,10 @@ const LANGUAGE_NAMES: Record<string, string> = {
   en: "English",
   tg: "Tajik (Cyrillic script)",
   ky: "Kyrgyz (Cyrillic script)",
+  kk: "Kazakh (Cyrillic script)",
+  mn: "Mongolian (Cyrillic script)",
+  az: "Azerbaijani (Latin script)",
+  uk: "Ukrainian",
 };
 
 // Byte-stable (L4): dynamic content goes in the user turn, never here.

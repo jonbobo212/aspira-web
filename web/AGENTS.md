@@ -24,7 +24,11 @@ brand, and content. Full spec: t100u repo `docs/SITE_FACTORY.md`; build plan:
    "international education platform … all rights reserved".
 3. Markets: Uzbekistan, Tajikistan, Kyrgyzstan only. Commissions/commercial
    terms never public.
-4. Everything partner-facing is trilingual (local/RU/EN). Content model:
+4. Everything partner-facing is trilingual (local/RU/EN). Market expansion
+   (bus #67/#68): core UZ/TJ/KG; KZ next (kk locale + country='kz' ready);
+   mn/az/uk locale plumbing shipped, rollout awaits owner decision. Ukraine
+   rule when it opens: Ukrainian-language ONLY, never Russian-first.
+   Content model:
    jsonb `{locale: text}` + `machine_locales` flags — human edits are never
    overwritten by re-translation.
 5. **The badge is the payment**: every tenant footer renders
@@ -56,9 +60,12 @@ ack processed rows, post status after significant work with ref=commit.
 ## Current state (Phase 0)
 - Schema migration `vitrina_core_schema` applied (tenants/sections/posts/
   media/staff/courses/testimonials/admins/intakes/leads + RLS).
-- Tenant runtime: hostname routing, brand CSS vars, School template v0
-  (home/news/news-detail/contact + lead form → vitrina_leads), per-tenant
-  data caching with `tenant:{slug}` tags.
+- Tenant runtime: hostname routing, brand CSS vars, School template
+  (home/news/news-detail/contact + lead form → vitrina_leads, stats section
+  with CountUp, BlurText hero — motion per t100u docs/DESIGN_REFERENCES.md
+  taste rules, own implementations in src/components/motion/), per-tenant
+  data caching with `tenant:{slug}` tags. Locales: uz/ru/en/tg/ky + kk full
+  UI strings; mn/az/uk plumbed (chrome falls back to EN until rollout).
 - Admin CMS v1: token-gated `/admin?t={token}` (`src/lib/admin-auth.ts`,
   VITRINA_ADMIN_SECRET HMAC — Aspira class-board pattern; Supabase-auth
   members are Phase 1). Post news/achievement/announcement → translate-on-

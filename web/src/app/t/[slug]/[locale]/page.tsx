@@ -2,11 +2,23 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getTenant, getSections, getPosts, resolveLocale, pick, localePath, type L10n } from "@/lib/tenant";
 import { ui } from "@/lib/ui-strings";
+import { BlurText } from "@/components/motion/blur-text";
+import { CountUp } from "@/components/motion/count-up";
+
+interface StatItem {
+  value: number;
+  suffix?: string;
+  label: L10n;
+}
 
 /**
- * Tenant home — School template v0 (walking skeleton, design sprint follows).
- * Renders hero + about from vitrina_sections, then latest news/achievements.
- * All content is partner-provided trilingual jsonb — nothing is invented here.
+ * Tenant home — School template (design sprint in progress).
+ * Renders hero + stats + about from vitrina_sections, then latest
+ * news/achievements. All content is partner-provided trilingual jsonb —
+ * nothing is invented here; stats render only numbers the partner supplied.
+ * Motion (docs/DESIGN_REFERENCES.md taste rules): BlurText hero is the one
+ * hero moment; CountUp on partner-provided stats; both honor
+ * prefers-reduced-motion.
  */
 export default async function TenantHome({
   params,
@@ -28,12 +40,16 @@ export default async function TenantHome({
 
   const hero = sections.find((s) => s.kind === "hero");
   const about = sections.find((s) => s.kind === "about");
+  const stats = sections.find((s) => s.kind === "stats");
+  const statItems = ((stats?.content.items as StatItem[]) ?? []).filter(
+    (item) => typeof item.value === "number"
+  );
 
   return (
     <div className="mx-auto max-w-5xl px-4">
       <section className="py-16 text-center">
         <h1 className="mx-auto max-w-3xl text-4xl font-bold text-brand">
-          {pick(hero?.content.title as L10n, locale, tenant.name)}
+          <BlurText text={pick(hero?.content.title as L10n, locale, tenant.name)} />
         </h1>
         {hero?.content.subtitle ? (
           <p className="mx-auto mt-4 max-w-2xl text-lg text-muted">
@@ -49,6 +65,21 @@ export default async function TenantHome({
           </Link>
         </div>
       </section>
+
+      {statItems.length > 0 ? (
+        <section className="border-t border-line py-10">
+          <dl className="grid gap-6 text-center sm:grid-cols-3">
+            {statItems.map((item, i) => (
+              <div key={i}>
+                <dd className="text-4xl font-bold text-brand">
+                  <CountUp value={item.value} suffix={item.suffix ?? ""} />
+                </dd>
+                <dt className="mt-1 text-sm text-muted">{pick(item.label, locale)}</dt>
+              </div>
+            ))}
+          </dl>
+        </section>
+      ) : null}
 
       {about ? (
         <section className="border-t border-line py-12">

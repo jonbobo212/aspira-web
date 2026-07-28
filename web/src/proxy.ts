@@ -9,7 +9,7 @@ import { NextRequest, NextResponse } from "next/server";
  * Dev/preview without a wildcard host: append `?__tenant={slug}`.
  * Custom domains land in Phase 1 (server-side lookup on vitrina_tenants.custom_domain).
  */
-const LOCALES = ["uz", "ru", "en", "tg", "ky"];
+const LOCALES = ["uz", "ru", "en", "tg", "ky", "kk", "mn", "az", "uk"];
 
 export default function proxy(request: NextRequest) {
   const url = request.nextUrl;
