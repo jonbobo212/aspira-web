@@ -4,6 +4,7 @@ import Link from "next/link";
 import { getTenant, resolveLocale, localePath } from "@/lib/tenant";
 import { ui, LOCALE_NAMES } from "@/lib/ui-strings";
 import { badgeUrl } from "@/lib/badge";
+import { ScrollProgress } from "@/components/motion/progress-bar";
 
 interface Params {
   slug: string;
@@ -50,18 +51,32 @@ export default async function TenantLayout({
 
   return (
     <div style={brandStyle} className="flex min-h-screen flex-col">
-      <header className="border-b border-line">
+      <ScrollProgress />
+
+      <header className="sticky top-0 z-40 border-b border-line/70 bg-white/70 backdrop-blur-md">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3">
           <Link href={localePath(tenant, locale)} className="flex items-center gap-3">
             {tenant.brand.logo_url ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={tenant.brand.logo_url} alt="" className="h-9 w-9 rounded object-contain" />
-            ) : null}
-            <span className="font-semibold text-brand">{tenant.name}</span>
+              <img src={tenant.brand.logo_url} alt="" className="h-9 w-9 rounded-lg object-contain" />
+            ) : (
+              <span
+                aria-hidden="true"
+                className="flex h-9 w-9 items-center justify-center rounded-lg font-bold text-white"
+                style={{ background: "linear-gradient(135deg, var(--brand), color-mix(in srgb, var(--brand) 60%, var(--brand-accent)))" }}
+              >
+                {tenant.name.charAt(0)}
+              </span>
+            )}
+            <span className="font-semibold tracking-tight text-brand">{tenant.name}</span>
           </Link>
-          <nav className="flex items-center gap-4 text-sm">
+          <nav className="flex items-center gap-1 text-sm">
             {nav.map((item) => (
-              <Link key={item.href} href={localePath(tenant, locale, item.href)} className="hover:text-brand">
+              <Link
+                key={item.href}
+                href={localePath(tenant, locale, item.href)}
+                className="rounded-full px-3 py-1.5 transition-colors hover:bg-brand/5 hover:text-brand"
+              >
                 {item.label}
               </Link>
             ))}
@@ -69,13 +84,17 @@ export default async function TenantLayout({
         </div>
       </header>
 
-      <div className="border-b border-line bg-paper">
-        <div className="mx-auto flex max-w-5xl gap-3 px-4 py-1.5 text-xs text-muted">
+      <div className="border-b border-line/60 bg-white/60">
+        <div className="mx-auto flex max-w-5xl gap-1.5 px-4 py-1.5 text-xs">
           {tenant.locales.map((code) => (
             <Link
               key={code}
               href={localePath(tenant, code)}
-              className={code === locale ? "font-semibold text-brand" : "hover:text-brand"}
+              className={
+                code === locale
+                  ? "rounded-full bg-brand px-2.5 py-0.5 font-medium text-white"
+                  : "rounded-full px-2.5 py-0.5 text-muted transition-colors hover:bg-brand/10 hover:text-brand"
+              }
             >
               {LOCALE_NAMES[code] ?? code}
             </Link>
@@ -85,15 +104,21 @@ export default async function TenantLayout({
 
       <main className="flex-1">{children}</main>
 
-      <footer className="mt-12 border-t border-line">
-        <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-3 px-4 py-6 text-sm text-muted sm:flex-row">
-          <span>© {new Date().getFullYear()} {tenant.name}</span>
+      <footer className="mt-16 bg-ink text-white">
+        <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-4 px-4 py-8 text-sm sm:flex-row">
+          <div className="text-center sm:text-left">
+            <p className="font-semibold">{tenant.name}</p>
+            <p className="mt-1 text-white/60">
+              © {new Date().getFullYear()}
+              {tenant.city ? ` · ${tenant.city}` : ""}
+            </p>
+          </div>
           {/* The badge is the contract: every gifted site links to the Aspira gateway. */}
           <a
             href={badgeUrl(tenant, locale)}
-            className="rounded border border-line px-3 py-1.5 font-medium text-brand hover:border-brand"
+            className="btn-shiny rounded-full border border-white/20 bg-white/10 px-4 py-2 font-medium text-white transition-colors hover:bg-white/20"
           >
-            {t.poweredBy}
+            {t.poweredBy} ✦
           </a>
         </div>
       </footer>

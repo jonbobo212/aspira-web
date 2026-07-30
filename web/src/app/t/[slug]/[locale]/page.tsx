@@ -4,6 +4,10 @@ import { getTenant, getSections, getPosts, resolveLocale, pick, localePath, type
 import { ui } from "@/lib/ui-strings";
 import { BlurText } from "@/components/motion/blur-text";
 import { CountUp } from "@/components/motion/count-up";
+import { Aurora } from "@/components/motion/aurora";
+import { Reveal } from "@/components/motion/reveal";
+import { TiltCard } from "@/components/motion/tilt-card";
+import { GradientText } from "@/components/motion/gradient-text";
 
 interface StatItem {
   value: number;
@@ -12,13 +16,12 @@ interface StatItem {
 }
 
 /**
- * Tenant home — School template (design sprint in progress).
- * Renders hero + stats + about from vitrina_sections, then latest
- * news/achievements. All content is partner-provided trilingual jsonb —
- * nothing is invented here; stats render only numbers the partner supplied.
- * Motion (docs/DESIGN_REFERENCES.md taste rules): BlurText hero is the one
- * hero moment; CountUp on partner-provided stats; both honor
- * prefers-reduced-motion.
+ * Tenant home — School template, full motion pass (owner directive, React
+ * Bits patterns as own implementations): Aurora + dot-grid hero with BlurText
+ * headline and shiny CTA, glass CountUp stats, scroll-Reveal sections,
+ * TiltCard achievements, hover-lift news cards. All content remains
+ * partner-provided trilingual jsonb — nothing invented; every effect is
+ * transform/opacity-only and honors prefers-reduced-motion.
  */
 export default async function TenantHome({
   params,
@@ -46,88 +49,126 @@ export default async function TenantHome({
   );
 
   return (
-    <div className="mx-auto max-w-5xl px-4">
-      <section className="py-16 text-center">
-        <h1 className="mx-auto max-w-3xl text-4xl font-bold text-brand">
-          <BlurText text={pick(hero?.content.title as L10n, locale, tenant.name)} />
-        </h1>
-        {hero?.content.subtitle ? (
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-muted">
-            {pick(hero.content.subtitle as L10n, locale)}
+    <div>
+      {/* Hero — the one big moment: aurora + dot grid + blur-in headline */}
+      <section className="relative overflow-hidden">
+        <Aurora />
+        <div aria-hidden="true" className="dot-grid absolute inset-0" />
+        <div className="relative mx-auto max-w-5xl px-4 py-24 text-center sm:py-28">
+          <p className="kicker">
+            <GradientText text={tenant.city ?? tenant.name} />
           </p>
-        ) : null}
-        <div className="mt-8">
-          <Link
-            href={localePath(tenant, locale, "/contact")}
-            className="inline-block rounded bg-brand px-6 py-3 font-medium text-white"
-          >
-            {t.contactHeading}
-          </Link>
+          <h1 className="mx-auto mt-4 max-w-3xl text-4xl font-bold tracking-tight sm:text-5xl">
+            <BlurText text={pick(hero?.content.title as L10n, locale, tenant.name)} className="text-brand" />
+          </h1>
+          {hero?.content.subtitle ? (
+            <p className="mx-auto mt-5 max-w-2xl text-lg text-muted">
+              {pick(hero.content.subtitle as L10n, locale)}
+            </p>
+          ) : null}
+          <div className="mt-10">
+            <Link
+              href={localePath(tenant, locale, "/contact")}
+              className="btn-shiny inline-block rounded-full bg-brand px-8 py-3.5 font-medium text-white shadow-lg shadow-brand/25 transition-transform hover:scale-[1.03]"
+            >
+              {t.contactHeading} →
+            </Link>
+          </div>
         </div>
       </section>
 
-      {statItems.length > 0 ? (
-        <section className="border-t border-line py-10">
-          <dl className="grid gap-6 text-center sm:grid-cols-3">
-            {statItems.map((item, i) => (
-              <div key={i}>
-                <dd className="text-4xl font-bold text-brand">
-                  <CountUp value={item.value} suffix={item.suffix ?? ""} />
-                </dd>
-                <dt className="mt-1 text-sm text-muted">{pick(item.label, locale)}</dt>
-              </div>
-            ))}
-          </dl>
-        </section>
-      ) : null}
+      <div className="mx-auto max-w-5xl px-4">
+        {/* Stats — glass cards, staggered reveal, counting numbers */}
+        {statItems.length > 0 ? (
+          <section className="relative -mt-6 pb-4">
+            <dl className="grid gap-4 sm:grid-cols-3">
+              {statItems.map((item, i) => (
+                <Reveal key={i} delay={i * 120}>
+                  <div className="glass rounded-2xl px-6 py-7 text-center">
+                    <dd className="text-4xl font-bold tracking-tight text-brand sm:text-5xl">
+                      <CountUp value={item.value} suffix={item.suffix ?? ""} />
+                    </dd>
+                    <dt className="mt-2 text-sm text-muted">{pick(item.label, locale)}</dt>
+                  </div>
+                </Reveal>
+              ))}
+            </dl>
+          </section>
+        ) : null}
 
-      {about ? (
-        <section className="border-t border-line py-12">
-          <h2 className="text-2xl font-semibold">{t.about}</h2>
-          <p className="mt-4 max-w-3xl whitespace-pre-line text-muted">
-            {pick(about.content.body as L10n, locale)}
-          </p>
-        </section>
-      ) : null}
+        {about ? (
+          <Reveal>
+            <section className="py-14">
+              <p className="kicker">{t.about}</p>
+              <h2 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">{tenant.name}</h2>
+              <p className="mt-4 max-w-3xl whitespace-pre-line leading-relaxed text-muted">
+                {pick(about.content.body as L10n, locale)}
+              </p>
+            </section>
+          </Reveal>
+        ) : null}
 
-      {achievements.length > 0 ? (
-        <section className="border-t border-line py-12">
-          <h2 className="text-2xl font-semibold">{t.achievements}</h2>
-          <ul className="mt-4 grid gap-4 sm:grid-cols-3">
-            {achievements.map((post) => (
-              <li key={post.id} className="rounded border border-line p-4">
-                <p className="font-medium">{pick(post.title, locale)}</p>
-                <p className="mt-2 line-clamp-3 text-sm text-muted">{pick(post.body, locale)}</p>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
+        {achievements.length > 0 ? (
+          <section className="border-t border-line py-14">
+            <Reveal>
+              <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+                <GradientText text={t.achievements} />
+              </h2>
+            </Reveal>
+            <ul className="mt-8 grid gap-4 sm:grid-cols-3">
+              {achievements.map((post, i) => (
+                <Reveal key={post.id} delay={i * 120}>
+                  <TiltCard className="h-full">
+                    <li className="glass h-full rounded-2xl p-6">
+                      <span
+                        aria-hidden="true"
+                        className="flex h-10 w-10 items-center justify-center rounded-full text-lg font-bold text-white"
+                        style={{ background: "linear-gradient(135deg, var(--brand-accent), color-mix(in srgb, var(--brand-accent) 55%, var(--brand)))" }}
+                      >
+                        {i + 1}
+                      </span>
+                      <p className="mt-4 font-semibold">{pick(post.title, locale)}</p>
+                      <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-muted">
+                        {pick(post.body, locale)}
+                      </p>
+                    </li>
+                  </TiltCard>
+                </Reveal>
+              ))}
+            </ul>
+          </section>
+        ) : null}
 
-      {news.length > 0 ? (
-        <section className="border-t border-line py-12">
-          <div className="flex items-baseline justify-between">
-            <h2 className="text-2xl font-semibold">{t.news}</h2>
-            <Link href={localePath(tenant, locale, "/news")} className="text-sm text-brand">
-              {t.readMore} →
-            </Link>
-          </div>
-          <ul className="mt-4 grid gap-4 sm:grid-cols-3">
-            {news.map((post) => (
-              <li key={post.id} className="rounded border border-line p-4">
-                <Link href={localePath(tenant, locale, `/news/${post.id}`)} className="font-medium hover:text-brand">
-                  {pick(post.title, locale)}
+        {news.length > 0 ? (
+          <section className="border-t border-line py-14">
+            <Reveal>
+              <div className="flex items-baseline justify-between">
+                <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">{t.news}</h2>
+                <Link href={localePath(tenant, locale, "/news")} className="text-sm font-medium text-brand hover:underline">
+                  {t.readMore} →
                 </Link>
-                {post.published_at ? (
-                  <p className="mt-2 text-xs text-muted">
-                    {new Date(post.published_at).toLocaleDateString(locale)}
-                  </p>
-                ) : null}
-              </li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
+              </div>
+            </Reveal>
+            <ul className="mt-8 grid gap-4 sm:grid-cols-3">
+              {news.map((post, i) => (
+                <Reveal key={post.id} delay={i * 120}>
+                  <li className="card-lift h-full rounded-2xl border border-line bg-white p-6">
+                    <Link href={localePath(tenant, locale, `/news/${post.id}`)} className="font-semibold hover:text-brand">
+                      {pick(post.title, locale)}
+                    </Link>
+                    {post.published_at ? (
+                      <p className="mt-2 text-xs text-muted">
+                        {new Date(post.published_at).toLocaleDateString(locale)}
+                      </p>
+                    ) : null}
+                    <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-muted">{pick(post.body, locale)}</p>
+                  </li>
+                </Reveal>
+              ))}
+            </ul>
+          </section>
+        ) : null}
+      </div>
     </div>
   );
 }
